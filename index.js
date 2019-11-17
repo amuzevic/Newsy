@@ -1,4 +1,5 @@
 const express = require("express");
+require("./mongoose");
 
 const app = express();
 const authors = require("./routes/authors");

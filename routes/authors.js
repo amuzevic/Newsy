@@ -1,26 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("@hapi/joi");
-
-function validateAuthor(author) {
-  const schema = Joi.object({
-    name: Joi.string()
-      .alphanum()
-      .min(3)
-      .max(30)
-      .required()
-  });
-  return schema.validate({ name: author.name });
-}
-
-var authors = [
-  { id: 1, name: "bobs" },
-  { id: 2, name: "pinus" },
-  { id: 3, name: "vegana" }
-];
+const Authors = require("../models/author");
 
 router.get("/", (req, res) => {
-  res.send(authors);
+  res.send(Authors.find());
 });
 
 router.get("/:id", (req, res) => {
