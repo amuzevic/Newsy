@@ -1,40 +1,25 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
 
+
 const authorSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String
+  firstName: {type: String, required: true, minlength: 2, maxlength: 255},
+  lastName: {type: String, required: true, minlength: 2, maxlength: 255}
 });
 
 const Author = mongoose.model("Author", authorSchema);
-
-async function createAuthor() {
-  const author = new Author({
-    firstName: "Bobs",
-    lastName: "Vegana"
-  });
-
-  const result = await author.save();
-  console.log(result);
-}
-
-async function getAuthors() {
-  const authors = await Author.find();
-  console.log(authors);
-  return authors;
-}
 
 function validate(author) {
   const schema = Joi.object({
     firstName: Joi.string()
       .alphanum()
       .min(2)
-      .max(30)
+      .max(255)
       .required(),
     lastName: Joi.string()
       .alphanum()
       .min(2)
-      .max(30)
+      .max(255)
       .required()
   });
   return schema.validate({
@@ -43,4 +28,5 @@ function validate(author) {
   });
 }
 
-exports.authorModel = Author;
+exports.Author = Author;
+exports.validate = validate;
