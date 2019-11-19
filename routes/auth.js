@@ -4,7 +4,7 @@ const {User} = require("../models/user");
 const bcrypt = require("bcrypt");
 const Joi = require("@hapi/joi");
 
-
+//log in by sending email and password and receive a JWT
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
   if(error) return res.status(400).send(error.details[0].message);

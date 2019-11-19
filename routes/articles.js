@@ -4,11 +4,13 @@ const {Article, validate} = require("../models/article");
 const isLoggedIn = require("../middleware/auth");
 const isAdmin = require("../middleware/admin");
 
-router.get("/", async (req, res) => {
- res.send(await Article.find());
+//get all articles
+router.get("/", isLoggedIn, async (req, res) => {
+ res.send(await Article.find().populate("author"));
 });
 
-router.get("/:id", async (req, res) => {
+//get article with specific id
+router.get("/:id", isLoggedIn, async (req, res) => {
   try {
     res.send(await Article.findById(req.params.id).populate("author"));
   } catch {
@@ -16,15 +18,17 @@ router.get("/:id", async (req, res) => {
   } 
 });
 
-router.get("/author/:authorId", async (req, res) => {
+//get all articles written by specific author
+router.get("/author/:authorId", isLoggedIn, async (req, res) => {
   try {
     res.send(await Article.find({author: req.params.authorId}));
   } catch {
-    res.status(404).send("An article with the given ID was not found");
+    res.status(404).send("No articles associated with provided author ID found");
   } 
 });
 
-router.post("/", isLoggedIn, async (req, res) => {
+//submit new article
+router.post("/", [isLoggedIn, isAdmin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -35,8 +39,34 @@ router.post("/", isLoggedIn, async (req, res) => {
     date: req.body.date
   });
 
-  const result = await article.save();
-  res.send(result); 
+  await article.save();
+  res.send(`Article created successfully with id: ${article._id} `); 
+});
+
+//edit an article
+router.put("/:id", [isLoggedIn, isAdmin], async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  try {
+    await Article.findByIdAndUpdate(req.params.id, {
+    fullText: req.body.fullText,
+    title: req.body.title
+    }, {new: true});
+  } catch {
+    return res.status(404).send("An article with the given ID was not found");
+  } 
+  res.send("Article updated successfully");
+});
+
+//delete an article
+router.delete("/:id", [isLoggedIn, isAdmin], async (req, res) => {
+  try {
+     await Article.deleteOne({_id: req.params.id});
+  } catch {
+    return res.status(404).send("An article with the given ID was not found");
+  }
+  res.send("Article deleted successfully");
 });
 
 module.exports = router;
