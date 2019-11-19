@@ -1,7 +1,7 @@
 # Newsy
 
 Instructions:
-  Since there is no frontend, to test the server use Postman or a similar tool.
+  0. Since there is no frontend, to test the server use Postman or a similar tool.
   1. Install all dependencies and run the server from a terminal 
   2. Send a POST request to /api/auth with the following json:
       {
