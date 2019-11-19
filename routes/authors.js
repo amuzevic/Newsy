@@ -11,11 +11,12 @@ router.get("/", isLoggedIn, async (req, res) => {
 
 //get specific author by id
 router.get("/:id", isLoggedIn, async (req, res) => {
-  try {
-    res.send(await Author.findById(req.params.id));
-  } catch {
-    res.status(404).send("An author with the given ID was not found");
-  } 
+
+  const author = await Author.findById(req.params.id);
+  if(!author) return res.status(404).send("An author with the given ID was not found");
+
+  res.send(author);
+
 });
 
 //create new author
@@ -36,25 +37,23 @@ router.post("/",[isLoggedIn, isAdmin], async (req, res) => {
 router.put("/:id",[isLoggedIn, isAdmin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-
-  try {
-    await Author.findByIdAndUpdate(req.params.id, {
+ 
+  const success = await Author.findByIdAndUpdate(req.params.id, {
     firstName: req.body.firstName,
     lastName: req.body.lastName
-    }, {new: true});
-  } catch {
-    return res.status(404).send("An author with the given ID was not found");
-  } 
+  }, {new: true});
+ 
+  if(!success) return res.status(404).send("An author with the given ID was not found");
+
   res.send("Author updated successfully");
 });
 
 //delete an author
 router.delete("/:id", [isLoggedIn, isAdmin], async (req, res) => {
-  try {
-     await Author.deleteOne({_id: req.params.id});
-  } catch {
-    return res.status(404).send("An author with the given ID was not found");
-  }
+
+  const result = await Author.deleteOne({_id: req.params.id});
+   if(result.deletedCount === 0) return res.status(404).send("An author with the given ID was not found");
+
   res.send("Author deleted successfully");
 });
 

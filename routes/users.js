@@ -12,11 +12,11 @@ router.get("/", [isLoggedIn, isAdmin], async (req, res) => {
 
 //get specific user by id
 router.get("/:id", [isLoggedIn, isAdmin], async (req, res) => {
-  try {
-    res.send(await User.findById(req.params.id));
-  } catch {
-    res.status(404).send("A user with the given ID was not found");
-  } 
+  const user = await User.findById(req.params.id);
+  if(!user) return res.status(404).send("A user with the given ID was not found");
+
+  res.send(user);
+
 });
 
 //enables unregistered users to create their own account, returns a JWT for the new user
@@ -46,25 +46,23 @@ router.put("/:id",[isLoggedIn, isAdmin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  try {
-    await User.findByIdAndUpdate(req.params.id, {
+  
+  const success = await User.findByIdAndUpdate(req.params.id, {
     name: req.body.name,
     email: req.body.email,
     isAdmin: req.body.isAdmin
-    }, {new: true});
-  } catch {
-    return res.status(404).send("An user with the given ID was not found");
-  } 
+  }, {new: true});
+ 
+  if(!success) return res.status(404).send("An user with the given ID was not found");
+
   res.send("User updated successfully");
 });
 
 //delete a user
 router.delete("/:id", [isLoggedIn, isAdmin], async (req, res) => {
-  try {
-     await User.deleteOne({_id: req.params.id});
-  } catch {
-    return res.status(404).send("A user with the given ID was not found");
-  }
+  const result = await User.deleteOne({_id: req.params.id});
+  if(result.deletedCount === 0) return res.status(404).send("A user with the given ID was not found");
+
   res.send("User deleted successfully");
 });
 

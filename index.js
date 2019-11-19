@@ -1,25 +1,22 @@
 const express = require("express");
-const authors = require("./routes/authors");
-const articles = require("./routes/articles");
-const users = require("./routes/users");
-const auth = require("./routes/auth");
-
-require("./mongoose");
-
 const app = express();
+require("express-async-errors");
+require("./mongoose");
+require("./startup/routes")(app);
 
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
 
-app.use("/api/authors", authors);
-app.use("/api/articles", articles);
-app.use("/api/users", users);
-app.use("/api/auth", auth);
+process.on("uncaughtException", (ex) => {
+  console.log(ex);
+  process.exit(1);
+})
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+process.on("unhandledRejection", (ex) => {
+  console.log(ex);
+  process.exit(1);
+})
+
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));

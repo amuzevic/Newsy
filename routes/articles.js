@@ -6,25 +6,23 @@ const isAdmin = require("../middleware/admin");
 
 //get all articles
 router.get("/", isLoggedIn, async (req, res) => {
- res.send(await Article.find().populate("author"));
+  res.send(await Article.find().populate("author"));
 });
 
 //get article with specific id
 router.get("/:id", isLoggedIn, async (req, res) => {
-  try {
-    res.send(await Article.findById(req.params.id).populate("author"));
-  } catch {
-    res.status(404).send("An article with the given ID was not found");
-  } 
+  const article = await Article.findById(req.params.id).populate("author")
+  if(!article) return res.status(404).send("An article with the given ID was not found");
+
+  res.send(article);
 });
 
 //get all articles written by specific author
 router.get("/author/:authorId", isLoggedIn, async (req, res) => {
-  try {
-    res.send(await Article.find({author: req.params.authorId}));
-  } catch {
-    res.status(404).send("No articles associated with provided author ID found");
-  } 
+  const articles = await Article.find({author: req.params.authorId});
+  if(articles.length === 0) return res.status(404).send("No articles associated with provided author ID found");
+
+  res.send(articles);
 });
 
 //submit new article
@@ -48,24 +46,22 @@ router.put("/:id", [isLoggedIn, isAdmin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  try {
-    await Article.findByIdAndUpdate(req.params.id, {
+  const success = await Article.findByIdAndUpdate(req.params.id, {
     fullText: req.body.fullText,
     title: req.body.title
-    }, {new: true});
-  } catch {
-    return res.status(404).send("An article with the given ID was not found");
-  } 
+  }, {new: true});
+
+  if(!success) return res.status(404).send("An article with the given ID was not found");
+
   res.send("Article updated successfully");
 });
 
 //delete an article
 router.delete("/:id", [isLoggedIn, isAdmin], async (req, res) => {
-  try {
-     await Article.deleteOne({_id: req.params.id});
-  } catch {
-    return res.status(404).send("An article with the given ID was not found");
-  }
+  
+  const result = await Article.deleteOne({_id: req.params.id});
+  if(result.deletedCount === 0) return res.status(404).send("An article with the given ID was not found");
+
   res.send("Article deleted successfully");
 });
 
