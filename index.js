@@ -10,6 +10,8 @@ const app = express();
 
 
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 app.use("/api/authors", authors);
 app.use("/api/articles", articles);
 app.use("/api/users", users);
