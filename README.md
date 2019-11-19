@@ -8,4 +8,4 @@ Instructions:
         "email": "admin@admin.com",
         "password":"123456789"
       }
-  3. The server will reply with a json web token, for all future requests make sure it's in the header with key "x-auth-token" and you'll be logged in with admin privileges
+  3. The server will reply with a json web token, for all future requests make sure to include it in the header with the key "x-auth-token", and you'll be logged in with admin privileges
